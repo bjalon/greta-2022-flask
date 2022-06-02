@@ -1,4 +1,5 @@
 import os
+import statistics
 import tempfile
 import uuid
 
@@ -12,6 +13,10 @@ def hello():
     return "Hello wolrd !"
 
 
+# http://localhost:8080/hello
+# { "username": "Benjamin" }
+# curl --request POST --url http://localhost
+
 @app.route("/hello", methods=['POST'])
 def helloPost():
     json = request.get_json()
@@ -21,9 +26,11 @@ def helloPost():
 # http://localhost:8080/hello/Benjamin
 # http://127.0.0.1:8080/hello/Benjamin
 
+
 @app.route("/hello/<path:path>")
 def toto(path):
     lang = request.args.get("lang")
+    print(f"info : {request.args}")
     if lang == "fr":
         return f"Bonjour {path}"
 
@@ -46,6 +53,43 @@ def extractFileFromPostRequest():
     tmpFile = os.path.join(tmpDir, tmpName)
     file.save(tmpFile)
     return tmpFile
+
+
+notes = {"Benjamin": [10, 12, 14], "François": [20, 18, 15], "Sylvain": [17, 16, 19]}
+
+
+@app.route("/notes/<path:eleve>", methods=["POST"])
+def post_notes(eleve):
+    note = request.args.get("note")
+    if eleve not in notes.keys():
+        notes[eleve] = []
+    notes[eleve].append(int(note))
+    print(f"notes eleve: {notes}")
+    return "{\"status\": \"ok\"}"
+
+
+@app.route("/notes/<path:eleve>", methods=["GET"])
+def get_notes(eleve):
+    if eleve not in notes.keys():
+        # abort(404)
+        return "{\"status\": \"ko\", \"error\": \"Unknown eleve\"}"
+    eleveNote = notes[eleve]
+    return f"{{\"status\": \"ok\", \"data\": {eleveNote} }}"
+
+
+@app.route("/moyenne/<path:eleve>", methods=["GET"])
+def get_moyenne(eleve):
+    if eleve not in notes.keys():
+        # abort(404)
+        return "{\"status\": \"ko\", \"error\": \"Unknown eleve\"}"
+    moyenne = statistics.mean(notes[eleve])
+    print(moyenne)
+    return f"{{\"status\": \"ok\", \"data\": {str(moyenne)} }}"
+
+
+@app.route("/eleves")
+def get_eleves():
+    return f"{{\"status\": \"ok\", \"data\": {list(notes.keys())} }}"
 
 
 if __name__ == "__main__":
