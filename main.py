@@ -2,11 +2,12 @@ import os
 import statistics
 import tempfile
 import uuid
+from flask_cors import CORS
 
 from flask import Flask, request, abort
 
 app = Flask(__name__)
-
+CORS(app)
 
 @app.route("/hello")
 def hello():
