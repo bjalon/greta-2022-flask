@@ -90,7 +90,8 @@ def get_moyenne(eleve):
 
 @app.route("/eleves")
 def get_eleves():
-    return f"{{\"status\": \"ok\", \"data\": {list(notes.keys())} }}"
+    myList = str(list(notes.keys())).replace("'", "\"")
+    return f"{{\"status\": \"ok\", \"data\": {myList}}}"
 
 
 if __name__ == "__main__":
